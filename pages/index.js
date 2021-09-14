@@ -1,65 +1,88 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+import { getFiles } from "../lib/mdx";
+import matter from "gray-matter";
+import fs from "fs";
+import path from "path";
+export default function Home({ works }) {
+    return (
+        <>
+            <Head>
+                <title>
+                    nlvnp - A thing to show the things i made and more
+                </title>
+                <link rel="icon" href="/favicon.ico" />
+                <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+            </Head>
+            <main className="relative flex flex-col px-10 pt-12 lg:space-x-12 lg:flex-row">
+                <div className="top-0 mb-8 space-y-4 lg:mb-0 lg:sticky lg:h-screen lg:w-1/3">
+                    <div className="text-2xl font-medium text-black bgre lg:text-5xl pt-9">
+                        <div className="mb-1">Frontend Developer</div>
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+                        <div
+                            style={{ fontFamily: "Comic Sans MS" }}
+                            className="font-bold"
+                        >
+                            Designer;)
+                        </div>
+                    </div>
+                    <p className="text-sm font-medium text-gray-500 lg:text-base ">
+                        What's poppin I'm Neil and I'm a developer, designer,
+                        and UI/UX enthusiast. I am currently seeking for job
+                        opportunities. and you found the thing that i made to
+                        show the things that I helped to make or made myself
+                    </p>
+                </div>
+                <section className="lg:w-2/3">
+                    <h2 className="mb-10 text-sm font-bold tracking-widest text-gray-900 uppercase">
+                        Works
+                    </h2>
+                    <ul className="space-y-4">
+                        {works.map((work) => (
+                            <li key={work.title}>
+                                <Link href={`works/${work.slug}`}>
+                                    <a>
+                                        <article className="space-y-3">
+                                            <Image
+                                                src={work.image}
+                                                width={1024}
+                                                height={560}
+                                                objectFit="cover"
+                                                className="rounded-lg"
+                                            />
+                                            <div className="flex ">
+                                                <h1 className="text-sm font-bold text-gray-900 lg:text-lg ">
+                                                    {work.title}:&nbsp;
+                                                </h1>
+                                                <p className="text-sm font-medium text-gray-900 lg:text-lg ">
+                                                    {work.summary}
+                                                </p>
+                                            </div>
+                                        </article>
+                                    </a>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            </main>
+        </>
+    );
+}
+export async function getStaticProps() {
+    const works = await getFiles("works");
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    return {
+        props: {
+            works: works.map((w) => {
+                const file = fs.readFileSync(
+                    path.join(process.cwd(), "data", "works", w),
+                    "utf-8"
+                );
+                const { data } = matter(file);
+                return { ...data, slug: w.replace(/\.mdx/, "") };
+            }),
+        },
+    };
 }
